@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib import ticker, cm
 from math import log,exp
 from numpy import ma
+import seaborn as sne
 
 def loadRootFile(file):
     events = uproot.open(file)
@@ -46,13 +47,37 @@ def plotXVsEta(data):
     fig, ax=plt.subplots(1,1)
     #histogram returns histogram plus axes...
     z=ma.masked_where(hist2d[0] <= 0, hist2d[0])
-    cf=plt.contourf(etaMean, np.log10(xMean), z, 8, alpha=.75, cmap='jet',locator=ticker.LogLocator())
+    cf=plt.contourf(etaMean, xMean, z, alpha=.75, cmap='jet',locator=ticker.LogLocator(numticks=20,subs=range(1,10)))
+  #  cf=plt.contourf(etaMean, np.log10(xMean), z, 8, alpha=.75, cmap='jet',locator=ticker.LogLocator())
     ax.set_yscale("log")
+    ax.yaxis.set_major_locator(ticker.LogLocator(subs=range(1,10)))
+    ax.yaxis.set_minor_locator(ticker.LogLocator(numticks=30))
   #  C = plt.contour(etaMean,xMean, z, 8, colors='black', linewidth=.5)
     fig.colorbar(cf)
     ax.set_title("$\eta$ vs $x$")
+    plt.xlabel('$\eta$')
+    plt.ylabel('$x$')
     return
 
+#do regular 1d plot, takes some panda
+def plotXVsEtaKDE(data):
+    arEta=data["hadEta"]
+    arEta=arEta.flatten();
+    #get x for the other dimension, now of course we have only have as many x values
+    arX=data["x"]
+    arX=np.repeat(arX,2)
+    fig, ax=plt.subplots(1,1)
+    ax.set_yscale("log")
+    ax.yaxis.set_major_locator(ticker.LogLocator(subs=range(1,10)))
+    ax.yaxis.set_minor_locator(ticker.LogLocator(numticks=30))
+    sns.kdeplot(arEta,arX,shade=True, clip=((-3,3),(0.001,0.1)))
+
+    #  C = plt.contour(etaMean,xMean, z, 8, colors='black', linewidth=.5)
+    fig.colorbar(cf)
+    ax.set_title("$\eta$ vs $x$")
+    plt.xlabel('$\eta$')
+    plt.ylabel('$x$')
+    return
 
 #do some sort of 2d plot, takes some panda
 def plotXVsEtaPt(data):
