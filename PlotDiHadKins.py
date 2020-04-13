@@ -129,7 +129,6 @@ def plotXVsEtaPt(data):
     return
 
 
-    
 #resolution in M, input are dataframes with true and smeared data
 def resInM(data, smeared):
     arM=data["Mh"]
@@ -143,19 +142,16 @@ def resInM(data, smeared):
     mEdges.append(2.0)
     mEdges.append(5.0)
 
-    arDiffs=arM-arMSmeared
-    mHist=np.histogram(arM,bins=mEdges)
-    mSmeared=np.histogram(arM,bins=mEdges)
-    mHistWeighted=np.histogram(arM,bins=mEdges,weights=arDiffs)
-    mHistWeightedMeanM=np.histogram(arM,bins=mEdges,weights=arM)
-    # uncertOnDiff=np.sqrt(mHist+mSmeared)
-    mMean=np.divide(mHistWeightedMeanM[0],mHist[0])
-    mMeanDiff=np.divide(mHistWeighted[0],mHist[0])
-
-    mDiffRel=np.divide(mMeanDiff,mMean)
-    #uncertOnRelDiff=np.divide(uncertOnDiff,mMean)
-
-    plt.plot(mMean,mMeanDiff,'v')
+    dfM=pd.DataFrame()
+    dfM["nonSmeared"]=data["Mh"]
+    dfM["diffToSmeared"]=dfM["nonSmeared"]-smeared["Mh"]
+    dfM['bin']=pd.cut(dfM["nonSmeared"],mEdges)
+    
+    s=dfM.groupby(dfM['bin'])
+    sMean=s.mean()
+    sStd=s.std()
+    
+    plt.errorbar(sMean['nonSmeared'],sMean['diffToSmeared'],yerr=sStd['diffToSmeared'],fmt='v')
     plt.xlabel('$M_{Inv}$')
     plt.ylabel('$M$-$M_{smeared}$')
     
