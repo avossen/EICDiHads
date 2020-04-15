@@ -11,11 +11,36 @@ from matplotlib import ticker, cm
 from math import log,exp
 from numpy import ma
 import seaborn as sne
+import awkward1 as ak
 
+def loadRootFileArray(file):
+    events = uproot.open(file)
+    return events['tree'].arrays(namedecode="utf-8")
+   # return events['tree'].lazyarrays(namedecode="utf-8",entrysteps=500)
 def loadRootFile(file):
     events = uproot.open(file)
     return events['tree'].lazyarrays(entrysteps=500)
 
+#takes in the arrays from two root files (gotten e.g. from loadRootFileA) ) and returns an awkward array event structure
+def returnEventStructure(unsmearedEventsA, smearedEventsA):
+    arrays = {name: ak.from_awkward0(array) for name, array in smearedEventsA.items()}
+    arraysTruth = {name: ak.from_awkward0(array) for name, array in unsmearedEventsA.items()}
+    events=ak.zip({"evnum":arrays["evnum"], "true":ak.zip({"x": arraysTruth["x"],"y": arraysTruth["y"],"Q2": arraysTruth["Q2"],"pair":ak.zip({"Z": arraysTruth["Z"],"hadP": arraysTruth["hadP"],
+                                                                               "hadPt": arraysTruth["hadPt"],
+                                                           "hadEta": arraysTruth["hadEta"],"hadPhi": arraysTruth["hadPhi"]},depthlimit=1),
+                                                            "PhPerp": arraysTruth["PhPerp"],"PhEta": arraysTruth["PhEta"],"PhPhi": arraysTruth["PhPhi"],"Ph": arraysTruth["Ph"]},depthlimit=1),
+                   "rec": ak.zip({"x": arrays["x"],"y": arrays["y"],"Q2": arrays["Q2"],"PhPerp": arrays["PhPerp"],"PhEta": arrays["PhEta"],"PhPhi": arrays["PhPhi"],"Ph": arrays["Ph"],
+                                              "pair":ak.zip({"Z": arrays["Z"],"hadP": arrays["hadP"],
+                                                            "hadPt": arrays["hadPt"],
+                                                           "hadEta": arrays["hadEta"],"hadPhi": arrays["hadPhi"]},depthlimit=1)},depthlimit=1)})
+    return events
+    
+def plotXVsEtaJ(data):
+    return
+
+def plotXVsEtaPtJ(events):
+   
+    return
 
 
 #do regular 1d plot, takes some panda
