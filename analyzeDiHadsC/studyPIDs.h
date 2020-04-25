@@ -6,6 +6,7 @@
 using namespace std;
 
 enum particleType{Pi,K};
+enum pairType{PiPi,PiK,KK,pairTypeEnd};
 
 int getRecPID(float eta, float pt, int pid)
 {
@@ -24,6 +25,20 @@ int getRecPID(float eta, float pt, int pid)
   
   return pid;  
 }
+
+int getRecPair(int pid1, int pid2)
+{
+
+  if(pid1==Pi && pid2==Pi)
+    return PiPi;
+  if(pid1==Pi && pid2==K)
+    return PiK;
+  if(pid1==K && pid2==Pi)
+    return PiK;
+  if(pid1==K && pid2==K)
+    return KK;
+}
+
 //0x33 piPlus1_piPlus2
 //0x34 piPlus_piMinus
 //0x37 piPlus_KMinus
@@ -145,6 +160,33 @@ pair<int,int> getCharges(int hadT){
       return pair<int,int>(-1,-1);
       break;
     } 
+}
+
+template<class T> T* allocateArray(int dim1);
+template<class T> T** allocateArray(int dim1, int dim2);
+template<class T> T*** allocateArray(int dim1, int dim2, int dim3);
+template<class T> T**** allocateArray(int dim1, int dim2, int dim3, int dim4);
+template<class T> T***** allocateArray(int dim1, int dim2, int dim3, int dim4, int dim5);
+template<class T> T****** allocateArray(int dim1, int dim2, int dim3, int dim4, int dim5,int dim6);
+template<class T> T******* allocateArray(int dim1, int dim2, int dim3, int dim4, int dim5,int dim6, int dim7);
+int getBin(vector<float>& b1, float value)
+{
+  int coo1=-1;
+
+  for(unsigned int i=0;i<b1.size();i++)
+    {
+      if(value<=b1[i])
+	{
+	coo1=i;
+	break;
+	}
+    }
+  /*  if(coo1<0)
+    {
+        cout <<"wrong coo: val: " << value <<endl;
+	}*/
+  //  cout <<"value: " << value <<" coo: " << coo1 <<endl;
+  return coo1;
 }
 
 
