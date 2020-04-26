@@ -2,11 +2,33 @@
 #define STUDYPID_HH
 #include <utility>
 #include <string>
+#include "TGraph.h"
 
 using namespace std;
 
 enum particleType{Pi,K};
 enum pairType{PiPi,PiK,KK,pairTypeEnd};
+
+
+void setGraphProps(TGraph* graph, int pt1, int pt2)
+{
+  	  if(pt2==0)
+           {
+	      graph->GetYaxis()->SetRangeUser(0.0,1.05);
+	      graph->SetMarkerStyle(20);
+	      graph->SetMarkerColor(kBlue);
+	    }
+	  if(pt2==1)
+	    {
+	      graph->SetMarkerStyle(21);
+	      graph->SetMarkerColor(kRed);
+	    }
+	  if(pt2==2)
+	    {
+	      graph->SetMarkerStyle(22);
+	      graph->SetMarkerColor(kGreen);
+	    }
+}
 
 int getRecPID(float eta, float pt, int pid)
 {
@@ -15,7 +37,7 @@ int getRecPID(float eta, float pt, int pid)
   //2 sigma: 95.0
   int k=rand()%1000;
 
-  if(k<3)
+  if(k<50)
     {
       if(pid==Pi)
 	return K;

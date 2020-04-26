@@ -201,14 +201,10 @@ int main(int argc, char** argv)
   float** numKKEta=allocateArray<float>(4,binningEta.size());
   float** numKKPt=allocateArray<float>(4,binningPt.size());
 
-  float** numRecPiPiEta=allocateArray<float>(4,binningEta.size());
-  float** numRecPiPiPt=allocateArray<float>(4,binningPt.size());
+  float*** numRecEta=allocateArray<float>(3,4,binningEta.size());
+  float*** numRecPt=allocateArray<float>(3,4,binningPt.size());
 
-  float** numRecPiKEta=allocateArray<float>(4,binningEta.size());
-  float** numRecPiKPt=allocateArray<float>(4,binningPt.size());
 
-  float** numRecKKEta=allocateArray<float>(4,binningEta.size());
-  float** numRecKKPt=allocateArray<float>(4,binningPt.size());
 
 
   //  cout<<"eta size: "<< binningEta.size() <<" pt size: " << binningPt.size() <<endl;
@@ -315,7 +311,7 @@ int main(int argc, char** argv)
 	//	  cout <<"1size of binningpt: "<< binningPt.size()<<%endl;
 	//  cout <<"1size of binningEta: "<< binningEta.size()<<endl;
 	    //	if((firstRecPid==Pi && secondRecPid==K) || (firstRecPid==K && secondRecPid==Pi))
-	    	if((pids.first==Pi && pids.second==K) || (pids.first==K && pids.second==Pi))
+	    if((pids.first==Pi && pids.second==K) || (pids.first==K && pids.second==Pi))
 	  {
 	    numPiKEta[3][etaBin]++;
 	    numPiKEta[recPair][etaBin]++;
@@ -328,7 +324,7 @@ int main(int argc, char** argv)
 	//	  cout <<"2size of binningEta: "<< binningEta.size()<<endl;
 	//	  cout <<"etabin: "<< etaBin <<" ptBin: "<< ptBin <<" recPair: "<< recPair<< endl;
 		//		if(firstRecPid==K && secondRecPid==K)
-		  		  if(pids.first==K && pids.second==K)
+	    if(pids.first==K && pids.second==K)
 	  {
 	    //total counts
 	    numKKEta[3][etaBin]++;
@@ -347,17 +343,23 @@ int main(int argc, char** argv)
       xVsQ2.Fill(x,Q2);
     }
 
-  float* totalRecsEta=allocateArray<float>(3,binningEta.size());
-  float* totalRecsPt=allocateArray<float>(3,binningPt.size());
+  float** totalRecsEta=allocateArray<float>(3,binningEta.size());
+  float** totalRecsPt=allocateArray<float>(3,binningPt.size());
 
   for(int i=0;i<binningEta.size();i++)
     {
+      meanEta[i]=meanEta[i]/countEta[i];
       for(int pairType=0;pairType<pairTypeEnd;pairType++)
 	{
 	  totalRecsEta[pairType][i]+=(numPiPiEta[pairType][i]+numPiKEta[pairType][i]+numKKEta[pairType][i]);
 	}
-      
-      meanEta[i]=meanEta[i]/countEta[i];
+      for(int recPType=0;recPType<pairTypeEnd;recPType++)
+	{
+	  numRecEta[recPType][PiPi][i]=numPiPiEta[recPType][i]/totalRecsEta[recPType][i];
+	  numRecEta[recPType][PiK][i]=numPiKEta[recPType][i]/totalRecsEta[recPType][i];
+	  numRecEta[recPType][KK][i]=numKKEta[recPType][i]/totalRecsEta[recPType][i];
+	}
+
       for(int j=0;j<3;j++)
 	{
 	  numPiPiEta[j][i]/=numPiPiEta[3][i];
@@ -372,18 +374,23 @@ int main(int argc, char** argv)
 	  numKKEta[j][i]/=numKKEta[3][i];
 	}
     }
+
   for(int i=0;i<binningPt.size();i++)
     {
+      meanPt[i]=meanPt[i]/countPt[i];
       for(int pairType=0;pairType<pairTypeEnd;pairType++)
 	{
 	  totalRecsPt[pairType][i]+=(numPiPiPt[pairType][i]+numPiKPt[pairType][i]+numKKPt[pairType][i]);
 	}
 
-      for(int realPType=0;realPType<3;realPType++)
+       for(int recPType=0;recPType<pairTypeEnd;recPType++)
 	{
-	  numRecPiPiPt[realPType][i]=numPiPiPt[realPType][i]
+	  numRecPt[recPType][PiPi][i]=numPiPiPt[recPType][i]/totalRecsPt[recPType][i];
+	  numRecPt[recPType][PiK][i]=numPiKPt[recPType][i]/totalRecsPt[recPType][i];
+	  numRecPt[recPType][KK][i]=numKKPt[recPType][i]/totalRecsPt[recPType][i];
+
 	}
-      meanPt[i]=meanPt[i]/countPt[i];
+
       for(int j=0;j<3;j++)
 	{
 	  numPiPiPt[j][i]/=numPiPiPt[3][i];
@@ -427,8 +434,87 @@ int main(int argc, char** argv)
   TGraph KK_piKFractionPt(binningPt.size(),meanPt, numKKPt[1]);
   TGraph KK_KKFractionPt(binningPt.size(),meanPt, numKKPt[2]);
 
-  
+  TGraph*** recGraphsEta=new TGraph**[pairTypeEnd];
+  for(int pt=0;pt<pairTypeEnd;pt++)
+    {
+      recGraphsEta[pt]=new TGraph*[pairTypeEnd];
+      for(int pt2=0;pt2<pairTypeEnd;pt2++)
+	{
+	  recGraphsEta[pt][pt2]=new TGraph(binningEta.size(),meanEta,numRecEta[pt][pt2]);
+	  setGraphProps(recGraphsEta[pt][pt2],pt,pt2);
+	}
+    }
+  TGraph*** recGraphsPt=new TGraph**[pairTypeEnd];
+  for(int pt=0;pt<pairTypeEnd;pt++)
+    {
+      recGraphsPt[pt]=new TGraph*[pairTypeEnd];
+      for(int pt2=0;pt2<pairTypeEnd;pt2++)
+	{
+	  recGraphsPt[pt][pt2]=new TGraph(binningPt.size(),meanPt,numRecPt[pt][pt2]);
+	  setGraphProps(recGraphsPt[pt][pt2],pt,pt2);
+	}
+    }
   TCanvas c1;
+  for(int pt=0;pt<pairTypeEnd;pt++)
+    {
+      for(int pt2=0;pt2<pairTypeEnd;pt2++)
+	{
+	  if(pt2==0)
+	    {
+	      recGraphsPt[pt][pt2]->Draw("AP");
+	    }
+	  if(pt2==1 || pt2==2)
+	    {
+	      recGraphsPt[pt][pt2]->Draw("P SAME");
+	    }
+	}
+      if(pt==0)
+	{
+	  c1.SaveAs("recPiPiPt.png");
+	}
+      if(pt==1)
+	{
+	  c1.SaveAs("recPiKPt.png");
+	}
+
+      if(pt==2)
+	{
+	  c1.SaveAs("recKKPt.png");
+	}
+
+    }
+  
+  for(int pt=0;pt<pairTypeEnd;pt++)
+    {
+      for(int pt2=0;pt2<pairTypeEnd;pt2++)
+	{
+	  if(pt2==0)
+	    {
+	      recGraphsEta[pt][pt2]->Draw("AP");
+	    }
+	  if(pt2==1 || pt2==2)
+	    {
+	      recGraphsEta[pt][pt2]->Draw("P SAME");
+	    }
+	}
+      if(pt==0)
+	{
+	  c1.SaveAs("recPiPiEta.png");
+	}
+      if(pt==1)
+	{
+	  c1.SaveAs("recPiKEta.png");
+	}
+
+      if(pt==2)
+	{
+	  c1.SaveAs("recKKEta.png");
+	}
+
+    }
+  
+  
+
   pipi_pipiFractionEta.GetYaxis()->SetRangeUser(0.0,1.0);
   pipi_pipiFractionEta.SetMarkerStyle(20);
   //  pipi_pipiFractionEta.SetMarkerSize(2);
