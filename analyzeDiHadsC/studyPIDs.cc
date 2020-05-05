@@ -28,6 +28,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+  int sigma=3;
   srand(time(NULL));
   if(argc<2)
     {
@@ -174,6 +175,12 @@ int main(int argc, char** argv)
 
     
   char* rootPath=argv[1];
+  if(argc==3)
+    {
+      cout <<"sigma " << argv[2] << " provided " << endl;
+      sigma=atoi(argv[2]);
+      cout <<"got " << sigma <<endl;
+    }
   //  chAll->Add((string(rootPath)+"/*.root").c_str());
   chAll->Add(rootPath);
   Int_t nevents=chAll->GetEntries();
@@ -259,8 +266,8 @@ int main(int argc, char** argv)
       //      cout <<"3yf1size of binningpt: "<< binningPt.size()<<endl;
       //      cout <<"3yf1size of binningEta: "<< binningEta.size()<<endl;
 
-      int firstRecPid=getRecPID(hadEta[0],hadPt[0],pids.first);
-      int secondRecPid=getRecPID(hadEta[1],hadPt[1],pids.second);
+      int firstRecPid=getRecPID(hadEta[0],hadPt[0],pids.first,sigma);
+      int secondRecPid=getRecPID(hadEta[1],hadPt[1],pids.second,sigma);
       int newType=getPairCode(firstRecPid,secondRecPid,charges.first,charges.second);
       int recPair=getRecPair(firstRecPid,secondRecPid);
 

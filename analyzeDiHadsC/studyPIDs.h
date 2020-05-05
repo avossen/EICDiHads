@@ -30,14 +30,17 @@ void setGraphProps(TGraph* graph, int pt1, int pt2)
 	    }
 }
 
-int getRecPID(float eta, float pt, int pid)
+int getRecPID(float eta, float pt, int pid, int sigma=3)
 {
 
+  int limit=3; //3 sigma
+  if(sigma==2)
+    limit=50;
   //3 sigma: 99.7
   //2 sigma: 95.0
   int k=rand()%1000;
 
-  if(k<50)
+  if(k<limit)
     {
       if(pid==Pi)
 	return K;
