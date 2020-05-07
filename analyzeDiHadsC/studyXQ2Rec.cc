@@ -23,6 +23,34 @@ using namespace std;
 int main(int argc, char** argv)
 {
 
+  TH2D corrConventionalQ2("convQ2","convQ2",100 ,1,200,100 ,1,200);
+  TH2D corrConventionalX("convX","convX",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrJBQ2("jbQ2","jbQ2",100 ,1,200,100 ,1,200);
+  TH2D corrJBX("jbX","jbX",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrDAQ2("daQ2","daQ2",100 ,1,200,100 ,1,200);
+  TH2D corrDAX("daX","daX",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrMixedQ2("mixedQ2","mixedQ2",100 ,1,200,100 ,1,200);
+  TH2D corrMixedX("mixedX","mixedX",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+
+  
+
+  TH2D corrConventionalQ2SmallY("convQ2SmallY","convQ2SmallY",100 ,1,200,100 ,1,200);
+  TH2D corrConventionalXSmallY("convXSmallY","convXSmallY",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrJBQ2SmallY("jbQ2SmallY","jbQ2SmallY",100 ,1,200,100 ,1,200);
+  TH2D corrJBXSmallY("jbXSmallY","jbXSmallY",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrDAQ2SmallY("daQ2SmallY","daQ2SmallY",100 ,1,200,100 ,1,200);
+  TH2D corrDAXSmallY("daXSmallY","daXSmallY",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  TH2D corrMixedQ2SmallY("mixedQ2SmallY","mixedQ2SmallY",100 ,1,200,100 ,1,200);
+  TH2D corrMixedXSmallY("mixedXSmallY","mixedXSmallY",100 ,0.0,1.0,100 ,-1.0,1.0);
+
+  
   srand(time(NULL));
   if(argc<4)
     {
@@ -139,18 +167,69 @@ int main(int argc, char** argv)
       ePyOrig=smear_orig_py[eIndex];
       ePzOrig=smear_orig_pz[eIndex];
       eEOrig=smear_orig_tot_e[eIndex];
-      cout <<"original e px: " << ePxOrig <<" py: " << ePyOrig<< " pz: "<< ePzOrig<<endl;
+      //      cout <<"original e px: " << ePxOrig <<" py: " << ePyOrig<< " pz: "<< ePzOrig<<endl;
+
+      //float sqrtS=63.2527; //sqrtS for 10x100;
+      //      float sqrtS=45; //sqrtS for 5x100;
+         float sqrtS=140.716; //sqrtS for 18x275;
+      //      float sqrtS=28.6; //sqrtS for 5x41;
       
       //calculate Q2 just from original and scattered electron
       Kins kinSmeared=getKinsFromScatElectron(beamEnergy,hadronBeamEnergy,ePx,ePy,ePz,eE);
       Kins kinOrig=getKinsFromScatElectron(beamEnergy,hadronBeamEnergy,ePxOrig,ePyOrig,ePzOrig,eEOrig);
+      Kins kinJBSmeared=getKinsJB(evt_prt_count,px,py,pz,dir_x,dir_y,dir_z,tot_e,pdg,smear_has_e, smear_has_p,beamEnergy,sqrtS*sqrtS);
+      Kins kinJB=getKinsJB(evt_prt_count,smear_orig_px,smear_orig_py,smear_orig_pz,dir_x,dir_y,dir_z,smear_orig_tot_e,pdg,smear_has_e, smear_has_p,beamEnergy,sqrtS*sqrtS,false);
 
-      float s=63; //sqrtS for 10x100;
-      //      float s=45; //sqrtS for 5x100;
-      //      float s=141; //sqrtS for 18x275;
-      //      float s=28.6; //sqrtS for 5x41;
-            Kins kinJB=getKinsJB(evt_prt_count,px,py,pz,tot_e,pdg,smear_has_e, smear_has_p,beamEnergy,s);
+      HadronicVars hvOrig=getHadronicVars(evt_prt_count,smear_orig_px,smear_orig_py,smear_orig_pz,dir_x,dir_y,dir_z,smear_orig_tot_e,pdg,smear_has_e, smear_has_p,false);
+      HadronicVars hv=getHadronicVars(evt_prt_count,px,py,pz,dir_x,dir_y,dir_z,tot_e,pdg,smear_has_e, smear_has_p);
       
+      Kins kinJB2=getKinsJB2(hvOrig,beamEnergy, sqrtS*sqrtS);
+      
+      Kins kinsDAOrig=getKinsDA(ePxOrig,ePyOrig,ePzOrig,eEOrig,hvOrig.theta, sqrtS*sqrtS);
+      Kins kinsDASmeared=getKinsDA(ePx,ePy,ePz,eE,hv.theta, sqrtS*sqrtS);
+      //      cout <<" kin orig x: " << kinOrig.x <<" Q2 conv: " << kinOrig.Q2 <<" y: " << kinOrig.y<<endl;
+      //      cout <<" kin orig 2 x " << kinJB2.x <<" Q2: "<< kinJB2.Q2 <<endl;
+      //      cout <<" kin conventional x: " << kinSmeared.x <<" JB: " << kinJB.x <<" Q2 conv: " << kinSmeared.Q2 <<" JB: " << kinJB.Q2 <<endl;
+      //      cout <<" conv y: " << kinSmeared.y <<" JB: " << kinJB.y <<endl;
+      //      cout <<"kins DA: x: " << kinsDAOrig.x <<" Q2: "<< kinsDAOrig.Q2 <<" y: " << kinsDAOrig.y<<endl;
+
+      float mixedXSmeared=kinSmeared.Q2/(sqrtS*sqrtS*kinJBSmeared.y);
+      float mixedXOrig=kinOrig.Q2/(sqrtS*sqrtS*kinJB.y);      
+      
+      if(kinOrig.Q2>4)
+	{
+	  //split y in above 0.01 and below 0.01
+	  if(kinOrig.y>0.01)
+	    {
+	      corrConventionalQ2.Fill(kinOrig.Q2,(kinOrig.Q2-kinSmeared.Q2)/kinOrig.Q2);
+	      corrConventionalX.Fill(kinOrig.x,(kinOrig.x-kinSmeared.x)/kinOrig.x);
+	      
+	      corrJBQ2.Fill(kinOrig.Q2,(kinOrig.Q2-kinJBSmeared.Q2)/kinOrig.Q2);
+	      corrJBX.Fill(kinOrig.x,(kinOrig.x-kinJBSmeared.x)/kinOrig.x);
+	      
+	      corrDAQ2.Fill(kinOrig.Q2,(kinOrig.Q2-kinsDASmeared.Q2)/kinOrig.Q2);
+	      corrDAX.Fill(kinOrig.x,(kinOrig.x-kinsDASmeared.x)/kinOrig.x);
+	      
+	      corrMixedX.Fill(kinOrig.x,(kinOrig.x-mixedXSmeared)/kinOrig.x);
+	      
+	      
+	    }
+	  else
+	    {
+	      corrConventionalQ2SmallY.Fill(kinOrig.Q2,(kinOrig.Q2-kinSmeared.Q2)/kinOrig.Q2);
+	      //	      corrConventionalXSmallY.Fill(kinOrig.x,kinSmeared.x);
+	      corrConventionalXSmallY.Fill(kinOrig.x,(kinOrig.x-kinSmeared.x)/kinOrig.x);
+	      
+	      corrJBQ2SmallY.Fill(kinOrig.Q2,(kinOrig.Q2-kinJBSmeared.Q2)/kinOrig.Q2);
+	      corrJBXSmallY.Fill(kinOrig.x,(kinOrig.x-kinJBSmeared.x)/kinOrig.x);
+	      
+	      corrDAQ2SmallY.Fill(kinOrig.Q2,(kinOrig.Q2-kinsDASmeared.Q2)/kinOrig.Q2);
+	      corrDAXSmallY.Fill(kinOrig.x,(kinOrig.x-kinsDASmeared.x)/kinOrig.x);
+	      
+	      corrMixedXSmallY.Fill(kinOrig.x,(kinOrig.x-mixedXSmeared)/kinOrig.x);
+	    }
+	}
+
       
       for(int pi=0;pi<evt_prt_count;pi++)
 	{
@@ -177,6 +256,79 @@ int main(int argc, char** argv)
 	    }
 	}
     }
+
+
+  char buffer[200];
+  TCanvas c1;
+   c1.SetLogx();
+//  c1.SetLogy();
+
+  c1.SetLogz();
+  corrConventionalQ2.Draw("colz");
+  sprintf(buffer,"correlationsConventionalQ2.png");
+  c1.SaveAs(buffer);
+  corrConventionalX.Draw("colz");
+  sprintf(buffer,"correlationsConventionalX.png");
+  c1.SaveAs(buffer);
+
+  
+  corrJBQ2.Draw("colz");
+  sprintf(buffer,"correlationsJBQ2.png");
+  c1.SaveAs(buffer);
+
+  
+  corrJBX.Draw("colz");
+  sprintf(buffer,"correlationsJBX.png");
+  c1.SaveAs(buffer);
+
+  
+  corrDAQ2.Draw("colz");
+  sprintf(buffer,"correlationsDAQ2.png");
+  c1.SaveAs(buffer);
+
+  corrDAX.Draw("colz");
+    sprintf(buffer,"correlationsDAX.png");
+  c1.SaveAs(buffer);
+
+  corrMixedX.Draw("colz");
+  sprintf(buffer,"correlationsMixedX.png");
+  c1.SaveAs(buffer);
+
+
+
+  
+  corrConventionalQ2SmallY.Draw("colz");
+  sprintf(buffer,"correlationsConventionalQ2SmallY.png");
+  c1.SaveAs(buffer);
+  corrConventionalXSmallY.Draw("colz");
+  sprintf(buffer,"correlationsConventionalXSmallY.png");
+  c1.SaveAs(buffer);
+
+  
+  corrJBQ2SmallY.Draw("colz");
+  sprintf(buffer,"correlationsJBQ2SmallY.png");
+  c1.SaveAs(buffer);
+
+  
+  corrJBXSmallY.Draw("colz");
+  sprintf(buffer,"correlationsJBXSmallY.png");
+  c1.SaveAs(buffer);
+
+  
+  corrDAQ2SmallY.Draw("colz");
+  sprintf(buffer,"correlationsDAQ2SmallY.png");
+  c1.SaveAs(buffer);
+
+  corrDAXSmallY.Draw("colz");
+    sprintf(buffer,"correlationsDAXSmallY.png");
+  c1.SaveAs(buffer);
+
+  corrMixedXSmallY.Draw("colz");
+  sprintf(buffer,"correlationsMixedXSmallY.png");
+  c1.SaveAs(buffer);
+	  
+
+  
 
     
   
